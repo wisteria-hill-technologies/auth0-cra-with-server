@@ -18,6 +18,9 @@ This is a simple POC for a Single Page Application (CRA) with 0Auth Login and an
 - More complicated than just JWT in case of using OAuth
 - Extra server layer required for session management
 
+## Further Investigation Required
+- Does this work with Webpack Module Federation?
+
 ## POC Demo Application
 ### Components
 - Single Page Application (Create React App)
@@ -30,3 +33,17 @@ This is a simple POC for a Single Page Application (CRA) with 0Auth Login and an
 4. `yarn run build` to build the app.
 5. `yarn run start` to start the application after the build is finished.
 6. Visit `http://localhost:3000`
+
+### References
+Great Udemy OAuth Overview course
+https://www.udemy.com/course/oauth-2-simplified/
+
+OAuth Community Site
+https://oauth.net/
+
+Arguments to use Session cookie instead of JWT
+- http://cryto.net/~joepie91/blog/2016/06/13/stop-using-jwt-for-sessions/
+- http://cryto.net/~joepie91/blog/2016/06/19/stop-using-jwt-for-sessions-part-2-why-your-solution-doesnt-work/
+- https://developer.okta.com/blog/2017/08/17/why-jwts-suck-as-session-tokens
+- https://www.youtube.com/watch?v=GdJ0wFi1Jyo
+- https://www.youtube.com/watch?v=U6OcC0yq1CE
