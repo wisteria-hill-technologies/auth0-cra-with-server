@@ -1,24 +1,85 @@
-import React from 'react';
-import logo from './logo.svg';
+import React, {useEffect, useState} from 'react';
 import './App.css';
+import Login from './pages/Login';
+import Dashboard from './pages/Dashboard';
+import handleErrors from './utils/handleErrors';
+
+import {
+  BrowserRouter as Router,
+  Switch,
+  Route,
+  Link
+} from "react-router-dom";
+
+declare global {
+  interface Window {
+    csrfToken:any;
+  }
+}
 
 function App() {
+  const { search } = window.location || {};
+  const [ user, setUser ] = useState(null);
+
+  useEffect(() => {
+    fetch('/api/verifyUser',{
+      headers: { 'Content-Type': 'application/json', 'x-csrf-token': window.csrfToken },
+      credentials: 'include',
+      cache: "no-cache"
+    }).then(handleErrors).then(result => {
+      console.log('verify user result>>>', result);
+      setUser(result);
+    }).catch(err => {
+      console.log('verify error : ', err);
+    });
+  }, []);
+
+  useEffect(() => {
+    if(!user && search) {
+      console.log('search exists!', search);
+      const queryObj = search.replace('?', '').split('&').reduce((acc, item) => {
+        const [ key, value ] = item.split('=');
+        // @ts-ignore
+        acc[key] = value;
+        return acc;
+      }, {});
+      const sessionObj = sessionStorage.getItem('a0.spajs.txs');
+      if(sessionObj) {
+        const body = {
+          ...queryObj,
+          code_verifier: JSON.parse(sessionObj).code_verifier
+        }
+        fetch(`/api/access`, {
+          method: 'POST',
+          body: JSON.stringify(body),
+          headers: { 'Content-Type': 'application/json', 'x-csrf-token': window.csrfToken },
+          credentials: 'include'
+        })
+          .then(handleErrors)
+          .then(result => {
+            console.log('result: ', result);
+            setUser(result);
+          })
+          .catch(e => {
+            console.log('error: ', e);
+          })
+        sessionStorage.removeItem('a0.spajs.txs');
+      }
+    }
+  }, [search, user]);
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <Router>
+        <Switch>
+          <Route path="/">
+            <Login user={user} />
+          </Route>
+          <Route path="/dashboard">
+            <Dashboard />
+          </Route>
+        </Switch>
+      </Router>
     </div>
   );
 }

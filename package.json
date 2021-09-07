@@ -10,15 +10,32 @@
     "@types/node": "^12.0.0",
     "@types/react": "^17.0.0",
     "@types/react-dom": "^17.0.0",
+    "body-parser": "^1.19.0",
+    "connect-redis": "^6.0.0",
+    "cookie-parser": "^1.4.5",
+    "cors": "^2.8.5",
+    "csurf": "^1.11.0",
+    "dotenv": "^10.0.0",
+    "ejs": "^3.1.6",
+    "express": "^4.17.1",
+    "express-session": "^1.17.2",
+    "morgan": "^1.10.0",
+    "node-fetch": "^2.6.1",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
+    "react-router-dom": "^5.3.0",
     "react-scripts": "4.0.3",
+    "redis": "^3.1.2",
     "typescript": "^4.1.2",
     "web-vitals": "^1.0.1"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
+    "dev": "react-scripts start",
+    "start": "node server/server.js",
+    "build": "react-scripts build && yarn run move-folder && yarn run rename-index && yarn run insert-csrf-tag",
+    "move-folder": "rm -rf ./server/build/* && cp -pr build/* ./server/build",
+    "rename-index": "mv ./server/build/index.html ./server/build/index.ejs",
+    "insert-csrf-tag": "echo '<script>window.csrfToken = \"<%= csrfToken %>\";</script>' >> ./server/build/index.ejs",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
@@ -39,5 +56,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@types/react-router-dom": "^5.1.8"
   }
 }
