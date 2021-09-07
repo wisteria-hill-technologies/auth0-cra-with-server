@@ -27,7 +27,6 @@ function App() {
       credentials: 'include',
       cache: "no-cache"
     }).then(handleErrors).then(result => {
-      console.log('verify user result>>>', result);
       setUser(result);
     }).catch(err => {
       console.log('verify error : ', err);
@@ -36,7 +35,6 @@ function App() {
 
   useEffect(() => {
     if(!user && search) {
-      console.log('search exists!', search);
       const queryObj = search.replace('?', '').split('&').reduce((acc, item) => {
         const [ key, value ] = item.split('=');
         // @ts-ignore
@@ -57,7 +55,6 @@ function App() {
         })
           .then(handleErrors)
           .then(result => {
-            console.log('result: ', result);
             setUser(result);
           })
           .catch(e => {
@@ -73,7 +70,7 @@ function App() {
       <Router>
         <Switch>
           <Route path="/">
-            <Login user={user} />
+            <Login user={user} setUser={setUser} />
           </Route>
           <Route path="/dashboard">
             <Dashboard />

@@ -12,11 +12,10 @@ const csrf = require('csurf');
 const errorHandler = require('./controllers/errorHandler');
 
 const index = require('./controllers/index');
-const setCsrf = require('./controllers/auth/setCsrf');
-const checkCsrf = require('./controllers/auth/checkCsrf');
 const getSession = require('./controllers/auth/getSession');
 const checkSession = require('./controllers/auth/checkSession');
-const getUserDetails = require('./controllers/userDetails/getUserDetails');
+const verifyUser = require('./controllers/auth/verifyUser');
+const logout = require('./controllers/auth/logout');
 
 app.use(express.json());
 app.use(morgan('combined'));
@@ -53,26 +52,14 @@ app.get('/', csrfProtection, index);
 
 app.use(csrfProtection); // any endpoints below this line will check for CSRF token.
 
-app.get('/api/verifyUser', (req, res, next) => {
-  console.log('verify user!');
-  console.log('csrfToken >>>', req.session.csrfToken);
-  console.log('req.session.user >>>', req.session.user);
-  if(req.session.user) {
-    res.json({ picture: '', name: 'Noby', email: 'test@test.com' });
-  } else {
-    const error = new Error('unauthorized');
-    error.status = 401;
-    next(error);
-  }
-});
+app.get('/api/verifyUser', verifyUser);
 
 app.post('/api/access', getSession);
 
 app.use(checkSession);
 // any endpoints below this line will check user session. If no user session, throw 401 error
 // unless process.env.AUTH_CHECK is set false.
-
-app.get('/api/user_details', getUserDetails);
+app.get('/api/logout', logout);
 
 app.use(errorHandler);
 

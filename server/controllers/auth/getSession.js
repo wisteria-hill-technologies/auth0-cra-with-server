@@ -1,8 +1,8 @@
 const fetch = require('node-fetch');
 const processResponse = require('../../utils/processResponse');
+const jwt_decode = require('jwt-decode');
 
 module.exports = async (req, res, next) => {
-  console.log('/access! req.body: ', req.body);
   const { code, code_verifier, state } = req.body || {};
   const body = {
     grant_type: "authorization_code",
@@ -32,8 +32,29 @@ module.exports = async (req, res, next) => {
     return;
   }
   // if get successful response, then get user and create a session.
-  req.session.user = data;
+  const { access_token, id_token } = data || {};
+  const decodedAccessToken = jwt_decode(access_token);
+  console.log('decodedAccessToken >>', decodedAccessToken);
+  const userDetailsByIdUrl = `https://${process.env.AUTH0_DOMAIN}/api/v2/users/${decodedAccessToken.sub}`;
+  const metadataResponse = await fetch(userDetailsByIdUrl, {
+    headers: {
+      Authorization: `Bearer ${access_token}`,
+    },
+  });
+  const { data: metaData, error: metaDataError } = await processResponse(metadataResponse, {
+    message: 'Unable to login'
+  });
+
+  if (metaDataError) {
+    console.log('metaDataError >>', metaDataError);
+    next(metaDataError);
+    return;
+  }
+  console.log('metaData >>>', metaData);
+
+  req.session.user = { tokenData: data, metaData };
+  const { name, email, picture } = metaData || {};
   res
     .status(response.status)
-    .json({ picture: '', name: 'Noby', email: 'test@test.com' });
+    .json({ name, email, picture });
 };

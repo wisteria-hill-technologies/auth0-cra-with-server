@@ -6,9 +6,10 @@ import Profile from '../components/profile';
 
 interface LoginProps {
   user: any;
+  setUser: (obj: null | any)=> void;
 }
 
-const Login: FC<LoginProps> = ({ user }) => {
+const Login: FC<LoginProps> = ({ user, setUser }) => {
 
   const loginWithAuth0 = () => {
     const code_verifier = base64URLEncode(crypto.randomBytes(32));
@@ -20,21 +21,30 @@ const Login: FC<LoginProps> = ({ user }) => {
       nonce,
       code_verifier,
       scope: process.env.REACT_APP_SCOPE,
-      audience: process.env.REACT_APP_AUDIENCE,
+      audience: process.env.REACT_APP_AUTH0_AUDIENCE,
       redirect_uri: process.env.REACT_APP_AUTH0_REDIRECT_URI
     };
 
     sessionStorage.setItem('a0.spajs.txs', JSON.stringify(auth0Values));
 
     const auth0LoginUrl =
-      `https://${process.env.REACT_APP_AUTH0_DOMAIN}/authorize?audience=${process.env.REACT_APP_AUDIENCE}&scope=${process.env.REACT_APP_SCOPE}&client_id=${process.env.REACT_APP_AUTH0_CLIENT_ID}&redirect_uri=${process.env.REACT_APP_AUTH0_REDIRECT_URI}&response_type=code&response_mode=query&state=${state}&nonce=${nonce}&code_challenge=${challenge}&code_challenge_method=S256&auth0Client=${process.env.REACT_APP_AUTH0_CLIENT}`
+      `https://${process.env.REACT_APP_AUTH0_DOMAIN}/authorize?audience=${process.env.REACT_APP_AUTH0_AUDIENCE}&scope=${process.env.REACT_APP_SCOPE}&client_id=${process.env.REACT_APP_AUTH0_CLIENT_ID}&redirect_uri=${process.env.REACT_APP_AUTH0_REDIRECT_URI}&response_type=code&response_mode=query&state=${state}&nonce=${nonce}&code_challenge=${challenge}&code_challenge_method=S256&auth0Client=${process.env.REACT_APP_AUTH0_CLIENT}`
 
     window.location.href = auth0LoginUrl;
   };
 
-  const logout = () => {
+  const logout = async () => {
     console.log('logout!');
-    // setIsAuthenticated(false);
+    try {
+      fetch('/api/logout', {
+        headers: { 'Content-Type': 'application/json', 'x-csrf-token': window.csrfToken },
+        credentials: 'include',
+        cache: "no-cache"
+      });
+      setUser(null);
+    } catch(err) {
+      console.log(err);
+    }
   }
 
   return (
